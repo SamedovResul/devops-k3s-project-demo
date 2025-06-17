@@ -32,10 +32,6 @@ Robitesk is deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 
 | Ingress       | NGINX + TLS via cert-manager       |
 | Storage       | PVCs with local-path               |
 
----
-
-## 🧭 Folder Structure
-
 
 ---
 
