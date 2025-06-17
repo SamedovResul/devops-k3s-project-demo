@@ -1,0 +1,83 @@
+name: Backend CI & Deploy
+
+on:
+  push:
+    branches:
+      - production
+
+env:
+  # adjust these if your repo is under an organization
+  REGISTRY: ghcr.io
+  IMAGE_NAME: robi-server
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image-latest: ${{ steps.set_image.outputs.image-latest }}
+      image-sha: ${{ steps.set_image.outputs.image-sha }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set image tags
+        id: set_image
+        run: |
+          REPO=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_SHA=ghcr.io/${REPO}/robi-server:${{ github.sha }}
+          IMAGE_LATEST=ghcr.io/${REPO}/robi-server:latest
+          echo "image-sha=$IMAGE_SHA" >> $GITHUB_OUTPUT
+          echo "image-latest=$IMAGE_LATEST" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT_ROBI }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: .Dockerfile
+          push: true
+          tags: |
+            ${{ steps.set_image.outputs.image-latest }}
+            ${{ steps.set_image.outputs.image-sha }}
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_LATEST: ${{ needs.build.outputs.image-latest }}
+      IMAGE_SHA: ${{ needs.build.outputs.image-sha }}
+      KUBECONFIG: /home/runner/.kube/config
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Restore kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          printf '%s' "${{ secrets.DO_KUBECONFIG_RAW }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+          echo "✅ kubeconfig restored"
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.27.4'
+
+      - name: Verify cluster access
+        run: |
+          kubectl config get-contexts
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get nodes
+      - name: Deploy backend to K3s
+        run: |
+          echo "Deploying new image: $IMAGE_LATEST"
+          kubectl set image deployment/backend backend=${{ env.IMAGE_LATEST }}
+          kubectl rollout restart deployment/backend
