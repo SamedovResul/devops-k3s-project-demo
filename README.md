@@ -1,44 +1,59 @@
-# 🚀 Enteskedu Frontend (React + DevOps K3s Deployment)
+# 🚀 Enteskedu Frontend – DevOps CI/CD with K3s
 
-**Enteskedu** is an engaging mobile and web-based **STEAM education platform** from Azerbaijan designed for kids.  
-It offers interactive courses in **robotics**, **programming**, **digital art**, **science**, and supports multiple languages.
+**Enteskedu** is an engaging STEAM education platform built in Azerbaijan, designed for kids. It offers interactive web and mobile-based courses in robotics, programming, digital art, and science — supporting multilingual access.
 
-This repository contains the **frontend client** of Enteskedu, built with **React + Vite** and deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 22.04 server** using a GitHub Actions CI/CD pipeline.
-
----
-
-## 🌐 Live Application
-
-> This application is currently deployed via Kubernetes Ingress with a domain name (not publicly shared here).
+This repository contains the **frontend** of the Enteskedu platform, developed with **React + Vite**, containerized using **Docker**, and deployed to a **K3s (Kubernetes)** cluster on a **DigitalOcean Ubuntu 22.04** server.
 
 ---
 
-## 🧰 Tech Stack
+## 📦 Tech Stack
 
-- **React.js + Vite** (Frontend)
-- **Docker**
-- **GitHub Actions** (CI/CD)
-- **K3s Kubernetes** (on Ubuntu 22.04 / DigitalOcean)
-- **Ingress Controller** (for domain routing)
-
----
-
-## ⚙️ CI/CD Pipeline
-
-Automated using GitHub Actions:  
-File: `.github/workflows/frontend-ci.yml`
-
-### 🛠 CI
-- On push to `main`, the pipeline:
-  - Builds Docker image
-  - Pushes to Docker Hub
-
-### 🚀 CD
-- Connects to remote Ubuntu server via SSH
-- Runs `kubectl apply` to deploy new changes to the K3s cluster
-- Uses `Ingress` to serve the frontend via a custom domain
+- **Frontend:** React.js + Vite
+- **Containerization:** Docker
+- **CI/CD:** GitHub Actions + GHCR (GitHub Container Registry)
+- **Infrastructure:** K3s Kubernetes on Ubuntu 22.04
+- **Ingress:** NGINX with TLS via cert-manager + Let’s Encrypt
 
 ---
 
-## 📁 Project Structure
+## 📁 Folder Structure
+
+.
+├── .github/
+│   └── workflows/
+│       └── frontend-ci.yml     # GitHub Actions CI/CD pipeline
+├── kubernetes/
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   └── ingress.yaml            # Ingress for TLS and domain routing
+├── public/                     # Static assets for the React app
+├── src/                        # React application source code
+├── .Dockerfile                 # Dockerfile for containerizing the app
+├── .gitignore
+├── README.md
+├── package.json
+└── package-lock.json
+
+---
+
+## 🚀 CI/CD Workflow
+
+GitHub Actions automates Docker image builds and deployment:
+
+### 🛠 CI (Build)
+
+- Triggered on push to `production` branch
+- Builds Docker image using a multi-stage Dockerfile
+- Pushes both `:latest` and `:sha` tags to **GitHub Container Registry (GHCR)**
+
+### 🚀 CD (Deploy)
+
+- Authenticates to K3s using a stored `kubeconfig` secret
+- Uses `kubectl set image` to update the live deployment
+- Performs a rollout restart
+
+> See `.github/workflows/frontend-ci.yml` for details.
+
+
+
 
