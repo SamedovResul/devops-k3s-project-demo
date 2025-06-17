@@ -16,25 +16,7 @@ This repository contains the **frontend** of the Robitesk platform, developed wi
 
 ---
 
-## 📁 Folder Structure
 
-.
-├── .github/
-│   └── workflows/
-│       └── frontend-ci.yml     # GitHub Actions CI/CD pipeline
-├── kubernetes/
-│   ├── frontend-deployment.yaml
-│   ├── frontend-service.yaml
-│   └── ingress.yaml            # Ingress for TLS and domain routing
-├── public/                     # Static assets for the React app
-├── src/                        # React application source code
-├── .Dockerfile                 # Dockerfile for containerizing the app
-├── .gitignore
-├── README.md
-├── package.json
-└── package-lock.json
-
----
 
 ## 🚀 CI/CD Workflow
 
