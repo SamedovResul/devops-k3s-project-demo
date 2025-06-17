@@ -33,6 +33,6 @@ The backend is built with **Node.js**, containerized using **Docker**, and deplo
 ### ✅ Deployment (`backend-deployment.yaml`)
 
 - Runs 2 replicas
-- Pulls Docker image from `ghcr.io/edinify/robi-server:latest`
+- Pulls Docker image from `ghcr.io/edinify/robi-ser:latest`
 - Loads environment variables from a Kubernetes secret `backend-env`
 - Mounts logs volume from PVC: `backend-logs-pvc`

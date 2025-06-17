@@ -16,7 +16,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: frontend
-          image: ghcr.io/edinify/robi-client:latest     # ensure matches your GHCR path
+          image: ghcr.io/edinify/robi:latest     # ensure matches your GHCR path
           ports:
             - containerPort: 80
           resources:

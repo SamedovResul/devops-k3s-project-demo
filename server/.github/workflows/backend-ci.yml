@@ -8,7 +8,7 @@ on:
 env:
   # adjust these if your repo is under an organization
   REGISTRY: ghcr.io
-  IMAGE_NAME: robi-server
+  IMAGE_NAME: robi-ser
 
 jobs:
   build:
@@ -25,8 +25,8 @@ jobs:
         id: set_image
         run: |
           REPO=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_SHA=ghcr.io/${REPO}/robi-server:${{ github.sha }}
-          IMAGE_LATEST=ghcr.io/${REPO}/robi-server:latest
+          IMAGE_SHA=ghcr.io/${REPO}/robi-ser:${{ github.sha }}
+          IMAGE_LATEST=ghcr.io/${REPO}/robi-ser:latest
           echo "image-sha=$IMAGE_SHA" >> $GITHUB_OUTPUT
           echo "image-latest=$IMAGE_LATEST" >> $GITHUB_OUTPUT
 

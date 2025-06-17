@@ -19,8 +19,8 @@ jobs:
         id: set_image
         run: |
           REPO=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_SHA=ghcr.io/${REPO}/robi-client:${{ github.sha }}
-          IMAGE_LATEST=ghcr.io/${REPO}/robi-client:latest
+          IMAGE_SHA=ghcr.io/${REPO}/robi:${{ github.sha }}
+          IMAGE_LATEST=ghcr.io/${REPO}/robi:latest
           echo "image-sha=$IMAGE_SHA" >> $GITHUB_OUTPUT
           echo "image-latest=$IMAGE_LATEST" >> $GITHUB_OUTPUT
 
