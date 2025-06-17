@@ -50,7 +50,7 @@ Robitesk is deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 
 - Similar to frontend (if configured)
 - Deploys Node.js server and rolls out updates via `kubectl`
 
-> Secrets like `GHCR_PAT_ROBI`, `DO_KUBECONFIG_RAW`, and DockerHub creds are managed using GitHub Secrets.
+> Secrets like `GHCR_PAT`, `KUBECONFIG`, and DockerHub creds are managed using GitHub Secrets.
 
 ---
 
@@ -102,8 +102,8 @@ All services are deployed into the same K3s cluster:
 
 | Name             | Type       | Purpose                     |
 |------------------|------------|-----------------------------|
-| `GHCR_PAT_ROBI`  | GitHub Secret | GHCR access for CI/CD   |
-| `DO_KUBECONFIG_RAW` | GitHub Secret | Kubeconfig for K3s     |
+| `GHCR_PAT`  | GitHub Secret | GHCR access for CI/CD   |
+| `KUBECONFIG` | GitHub Secret | Kubeconfig for K3s     |
 | `mongo-env`      | K8s Secret | MongoDB root credentials    |
 | `ghcr-secret`    | K8s Secret | Docker image pull credentials |
 

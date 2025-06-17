@@ -35,7 +35,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_PAT_ROBI }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -62,7 +62,7 @@ jobs:
       - name: Restore kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          printf '%s' "${{ secrets.DO_KUBECONFIG_RAW }}" > $HOME/.kube/config
+          printf '%s' "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
           echo "✅ kubeconfig restored"
       - name: Install kubectl
