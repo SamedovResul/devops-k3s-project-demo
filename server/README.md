@@ -1,6 +1,6 @@
-# ⚙️ Enteskedu Backend (Node.js + DevOps K3s Deployment)
+# ⚙️ Robitesk Backend (Node.js + DevOps K3s Deployment)
 
-This is the **backend API service** powering the Enteskedu STEAM education platform — designed for children to explore robotics, programming, digital art, and science.
+This is the **backend API service** powering the Robitesk STEAM education platform — designed for children to explore robotics, programming, digital art, and science.
 
 The backend is built with **Node.js**, containerized using **Docker**, and deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 22.04** server. It supports WebSocket connections, API endpoints, persistent logging, and secure environment management via Kubernetes Secrets.
 
