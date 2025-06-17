@@ -1,70 +1,44 @@
-# Getting Started with Create React App
+# 🚀 Enteskedu Frontend (React + DevOps K3s Deployment)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Enteskedu** is an engaging mobile and web-based **STEAM education platform** from Azerbaijan designed for kids.  
+It offers interactive courses in **robotics**, **programming**, **digital art**, **science**, and supports multiple languages.
 
-## Available Scripts
+This repository contains the **frontend client** of Enteskedu, built with **React + Vite** and deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 22.04 server** using a GitHub Actions CI/CD pipeline.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🌐 Live Application
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+> This application is currently deployed via Kubernetes Ingress with a domain name (not publicly shared here).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🧰 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **React.js + Vite** (Frontend)
+- **Docker**
+- **GitHub Actions** (CI/CD)
+- **K3s Kubernetes** (on Ubuntu 22.04 / DigitalOcean)
+- **Ingress Controller** (for domain routing)
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## ⚙️ CI/CD Pipeline
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Automated using GitHub Actions:  
+File: `.github/workflows/frontend-ci.yml`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🛠 CI
+- On push to `main`, the pipeline:
+  - Builds Docker image
+  - Pushes to Docker Hub
 
-### `npm run eject`
+### 🚀 CD
+- Connects to remote Ubuntu server via SSH
+- Runs `kubectl apply` to deploy new changes to the K3s cluster
+- Uses `Ingress` to serve the frontend via a custom domain
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📁 Project Structure
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
