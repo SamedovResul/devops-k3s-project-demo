@@ -1,6 +1,6 @@
 # 🗃️ MongoDB on Kubernetes (K3s)
 
-This folder contains the Kubernetes manifests to deploy a **MongoDB 6.0** instance with **persistent storage**, **environment-based secrets**, and a **ClusterIP service** — designed for use with applications deployed on a **K3s Kubernetes cluster** (e.g., Enteskedu backend).
+This folder contains the Kubernetes manifests to deploy a **MongoDB 6.0** instance with **persistent storage**, **environment-based secrets**, and a **ClusterIP service** — designed for use with applications deployed on a **K3s Kubernetes cluster** (e.g., Robitesk backend).
 
 ---
 
