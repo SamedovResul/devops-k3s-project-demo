@@ -1,8 +1,8 @@
-# 🚀 Enteskedu Frontend – DevOps CI/CD with K3s
+# 🚀 Robitesk Frontend – DevOps CI/CD with K3s
 
-**Enteskedu** is an engaging STEAM education platform built in Azerbaijan, designed for kids. It offers interactive web and mobile-based courses in robotics, programming, digital art, and science — supporting multilingual access.
+**Robitesk** is an engaging STEAM education platform built in Azerbaijan, designed for kids. It offers interactive web and mobile-based courses in robotics, programming, digital art, and science — supporting multilingual access.
 
-This repository contains the **frontend** of the Enteskedu platform, developed with **React + Vite**, containerized using **Docker**, and deployed to a **K3s (Kubernetes)** cluster on a **DigitalOcean Ubuntu 22.04** server.
+This repository contains the **frontend** of the Robitesk platform, developed with **React + Vite**, containerized using **Docker**, and deployed to a **K3s (Kubernetes)** cluster on a **DigitalOcean Ubuntu 22.04** server.
 
 ---
 
