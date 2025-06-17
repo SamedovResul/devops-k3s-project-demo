@@ -1,18 +1,38 @@
-# ⚙️ Robitesk Backend – Node.js + K3s Kubernetes + Persistent Logs
+# ⚙️ Enteskedu Backend (Node.js + DevOps K3s Deployment)
 
-This repository contains the **backend service** of the Robitesk STEAM education platform — a powerful Node.js API server supporting the platform's content, WebSocket, and data operations.
+This is the **backend API service** powering the Enteskedu STEAM education platform — designed for children to explore robotics, programming, digital art, and science.
 
-The backend is containerized with **Docker**, deployed to a **K3s Kubernetes** cluster on a **DigitalOcean Ubuntu 22.04** server, and exposed within the cluster via an internal service. It features persistent logging with Kubernetes volumes and secrets-based environment management.
+The backend is built with **Node.js**, containerized using **Docker**, and deployed to a **K3s Kubernetes cluster** on a **DigitalOcean Ubuntu 22.04** server. It supports WebSocket connections, API endpoints, persistent logging, and secure environment management via Kubernetes Secrets.
+
+---
+
+## 🧰 Tech Stack
+
+- **Backend:** Node.js (Express)
+- **Containerization:** Docker + GitHub Container Registry (GHCR)
+- **CI/CD:** GitHub Actions (optional)
+- **Infrastructure:** K3s Kubernetes (DigitalOcean VM)
+- **Ingress:** NGINX with TLS
+- **Secrets & Config:** Kubernetes `Secret` and `envFrom`
+- **Logs:** Kubernetes PersistentVolumeClaim (PVC)
+
+---
+## 🚀 Key Features
+
+- 🔐 **Secrets Management** with Kubernetes `envFrom`
+- 🧠 **Cluster-Scoped Deployment** with 2 replicas
+- 📦 **Persistent Logging** using Kubernetes PVC (mounted to `/app/logs`)
+- 🛰️ **WebSocket Support** (`/socket.io`) via Ingress routing
+- 🧩 **ClusterIP Service** for secure internal communication
+- 🌐 **TLS & Routing** configured through shared NGINX Ingress
 
 ---
 
-## 📦 Tech Stack
+## ⚙️ Kubernetes Configuration
 
-- **Backend Framework:** Node.js
-- **Containerization:** Docker + GHCR
-- **CI/CD:** GitHub Actions
-- **Infrastructure:** K3s Kubernetes on DigitalOcean
-- **Storage:** PVC for logs
-- **Secrets:** `envFrom` Kubernetes secret injection
+### ✅ Deployment (`backend-deployment.yaml`)
 
----
+- Runs 2 replicas
+- Pulls Docker image from `ghcr.io/edinify/robi-server:latest`
+- Loads environment variables from a Kubernetes secret `backend-env`
+- Mounts logs volume from PVC: `backend-logs-pvc`
