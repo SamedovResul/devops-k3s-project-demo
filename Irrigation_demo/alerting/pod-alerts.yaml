@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring-stack
+spec:
+  groups:
+  - name: pod.rules
+    rules:
+    - alert: PodCrashLooping
+      expr: rate(kube_pod_container_status_restarts_total[5m]) > 0.1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting frequently"
+        description: "Container {{ $labels.container }} restarted {{ printf \"%.2f\" $value }} times / 5m."
+
+    - alert: PodNotRunning
+      expr: kube_pod_status_phase{phase=~"Failed|Unknown|Pending"} > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is not running"
+        description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has status {{ $labels.phase }} for more than 5 minutes."

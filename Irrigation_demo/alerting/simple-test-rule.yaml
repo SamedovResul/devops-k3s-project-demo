@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: simple-test-rule
+  namespace: monitoring
+  labels:
+    release: monitoring-stack
+spec:
+  groups:
+  - name: app.rules
+    rules:
+    - alert: AlwaysFiringTest
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Test alert"
+        description: "This alert always fires for email test."
