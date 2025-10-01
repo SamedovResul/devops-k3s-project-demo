@@ -2,7 +2,7 @@
 
 This repository demonstrates real-world DevOps practices implemented across **two production-grade projects**: a learning platform (**Robitesk**) and an IoT smart irrigation system (**Azirrigation**). Both projects are fully containerized, monitored, and deployed using modern DevOps tools like Kubernetes, GitHub Actions, Docker, Prometheus, and Grafana.
 
----
+
 
 ## 📘 Project 1: Robitesk – LMS Platform (Web + DevOps)
 
