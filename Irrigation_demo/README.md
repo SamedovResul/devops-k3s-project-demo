@@ -80,7 +80,7 @@ azirrigation-backend/
 4. Roll out restart to apply the new image
 
 ### Secrets Used
-- `GHCR_PAT`: GitHub Container Registry token
+- `****_PAT`: GitHub Container Registry token
 - `**_*****_RAW`: Raw Kubeconfig for K3s cluster access
 
 ---

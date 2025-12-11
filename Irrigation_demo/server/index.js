@@ -15,6 +15,16 @@ mongoose.connect('mongodb+srv://URI', {
 
 const Item = mongoose.model('Item', { name: String });
 
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    const metrics = await register.metrics();
+    res.end(metrics);
+  } catch (error) {
+    res.status(500).end(error);
+  }
+});
+
 app.get('/api/items', async (req, res) => {
   const items = await Item.find();
   res.json(items);
