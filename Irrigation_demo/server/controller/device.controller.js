@@ -6,7 +6,7 @@ import {
   activeDevicesGauge
 } from '../metrics';
 
-// Add this helper function at the top of your controller
+// this is helper function 
 async function measureDbOperation(operation, collection, asyncFunction) {
   const start = Date.now();
   try {
@@ -36,7 +36,7 @@ export const checkDeviceConnection = async (req, res) => {
       deviceCheckInsTotal.inc({ device_id: deviceId });
     }
     
-    // Your existing logic here
+
     const device = await measureDbOperation('findOne', 'devices', async () => {
       return await Model.findOne({ deviceId });
     });
@@ -52,7 +52,7 @@ export const checkDeviceConnection = async (req, res) => {
       });
     });
     
-    // Update active devices gauge periodically (you could also do this in a separate interval)
+    // Update active devices gauge periodically
     updateActiveDevicesCount();
     
     res.json({ 

@@ -5,7 +5,7 @@ import {
   dbOperationDuration
 } from '../metrics.js';
 
-// Add the same measureDbOperation helper function here
+
 async function measureDbOperation(operation, collection, asyncFunction) {
   const start = Date.now();
   try {
