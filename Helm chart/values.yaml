@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: registry.k8s.io/ingress-nginx/controller
+  tag: "v1.9.6"
+  pullPolicy: IfNotPresent
+  
+
+ingressClass:
+  name: nginx-trial 
+  createIngressClass: true
+
+controller:
+  watchIngressWithoutClass: false
+
+service:
+  type: LoadBalancer
+  port: 80
+
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
