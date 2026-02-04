@@ -103,7 +103,3 @@ Or open http://localhost in your browser.
 ## Author
 
 Created as part of infrastructure trial task.
-
-## License
-
-MIT
