@@ -99,7 +99,3 @@ Or open http://localhost in your browser.
 - **ServiceAccount**: For pod authentication
 - **IngressClass**: Named `nginx-trial`
 - **ClusterRole & ClusterRoleBinding**: RBAC permissions
-
-## Author
-
-Created as part of infrastructure trial task.
