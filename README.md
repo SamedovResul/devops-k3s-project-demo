@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+# 🌐 DevOps Portfolio Projects – Robitesk & Azirrigation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository demonstrates real-world DevOps practices implemented across **two production-grade projects**: a learning platform (**Robitesk**) and an IoT smart irrigation system (**Azirrigation**). Both projects are fully containerized, monitored, and deployed using modern DevOps tools like Kubernetes, GitHub Actions, Docker, Prometheus, and Grafana.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📘 Project 1: Robitesk – LMS Platform (Web + DevOps)
 
-### `npm start`
+Robitesk is a mobile and web-based STEAM education platform for children, offering interactive courses in robotics, programming, digital art, and science.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🔧 Tech Stack
+- **Frontend:** React.js + Vite
+- **Backend:** Node.js (Express + Socket.io)
+- **Database:** MongoDB
+- **CI/CD:** GitHub Actions
+- **Infra:** Kubernetes (K3s) on DigitalOcean
+- **Ingress:** NGINX with TLS via cert-manager
+- **Containerization:** Docker + GHCR
+- **Monitoring:** Prometheus, Grafana
+- **Alerting:** Alertmanager
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### ✅ DevOps Highlights
+- CI/CD pipeline automatically builds Docker images and deploys via `kubectl`
+- TLS-secured Ingress with WebSocket support
+- Persistent Volume Claims for backend logs and MongoDB
+- Monitoring dashboards via Grafana + Prometheus
+- Multi-env support with Kubernetes Secrets
 
-### `npm test`
+### 📂 Key Folders
+robitesk/
+├── client/ # React + Vite frontend
+├── server/ # Node.js backend
+├── mongo/ # MongoDB K8s setup
+├── metrics/ # Grafana, Prometheus config
+├── alerting/ # Alertmanager rules
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+markdown
+Copy code
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 📗 Project 2: Azirrigation – Smart Irrigation Platform
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Azirrigation is a smart irrigation system designed for both gardens and large-scale fields. It collects soil data and uses AI (LLM) to optimize watering schedules. Control is managed via a mobile app (React Native).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🔧 Tech Stack
+- **Backend:** Node.js (Express)
+- **Client:** React Native (mobile only)
+- **Database:** MongoDB
+- **Infra:** Kubernetes (K3s) on AWS EC2
+- **Monitoring:** Prometheus, Grafana, Alertmanager
+- **CI/CD:** GitHub Actions
+- **Secrets:** Managed via Kubernetes Secrets
+- **Persistence:** PVC for logs and MongoDB
 
-### `npm run eject`
+### ✅ DevOps Highlights
+- Real-time metrics collection using Prometheus
+- Grafana dashboards accessible via secure Ingress
+- Custom alert rules for resource usage and pod health
+- TLS-secured services via NGINX Ingress + cert-manager
+- Modular repo structure (backend, db, metrics, alerting)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 📂 Key Folders
+azirrigation/
+├── server/ # Node.js backend + CI/CD
+├── db/ # MongoDB deployment + PVC
+├── metrics/ # Grafana + Prometheus configs
+├── alerting/ # Prometheus alert rules
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+yaml
+Copy code
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📈 Monitoring & Alerting (Both Projects)
+- ✅ Prometheus scrape configurations
+- ✅ Grafana dashboards for frontend/backend/mongo
+- ✅ Alertmanager with memory, pod, and custom alert rules
+- ✅ Ingress rules for Prometheus and Grafana via HTTPS
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📦 CI/CD Pipeline (Shared Structure)
+- Trigger: Push to `production` branch
+- Build: Docker image via GitHub Actions
+- Push: Upload image to GitHub Container Registry (GHCR)
+- Deploy: SSH + `kubectl set image` + rollout restart
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🛡️ Security Best Practices
+- No hardcoded secrets — all secrets injected via Kubernetes `envFrom`
+- Kubeconfig & GHCR credentials are stored as GitHub Secrets
+- Ingress uses Let's Encrypt via cert-manager for TLS termination

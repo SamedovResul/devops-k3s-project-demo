@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: custom-app-rules
+  namespace: monitoring
+  labels:
+    release: monitoring-stack
+spec:
+  groups:
+    - name: app.rules
+      rules:
+        - alert: PodHighCPU
+          expr: |
+            sum by (pod, namespace) (
+              rate(container_cpu_usage_seconds_total{container!="",pod!=""}[5m])
+            ) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU on pod {{ $labels.pod }}"
+            description: "CPU > 80% for 10m in {{ $labels.namespace }}/{{ $labels.pod }}"
