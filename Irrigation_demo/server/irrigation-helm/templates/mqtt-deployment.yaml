@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mqtt
+spec:
+  replicas: {{ .Values.mqtt.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mqtt
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mqtt
+    spec:
+      containers:
+        - name: mqtt
+          image: "{{ .Values.mqtt.image.repository }}:{{ .Values.mqtt.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.mqtt.ports.mqtt }}
+            - containerPort: {{ .Values.mqtt.ports.websocket }}
+          resources:
+            requests:
+              memory: {{ .Values.mqtt.resources.requests.memory }}
+              cpu: {{ .Values.mqtt.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.mqtt.resources.limits.memory }}
+              cpu: {{ .Values.mqtt.resources.limits.cpu }}
+          volumeMounts:
+            - name: mqtt-config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            - name: mqtt-password
+              mountPath: /mosquitto/config/passwordfile
+              subPath: passwordfile
+            - name: mqtt-data
+              mountPath: /mosquitto/data
+      volumes:
+        - name: mqtt-config
+          configMap:
+            name: {{ .Release.Name }}-mqtt-config
+        - name: mqtt-password
+          secret:
+            secretName: mqtt-password
+        - name: mqtt-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mqtt-pvc

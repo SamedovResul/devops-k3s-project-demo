@@ -1,8 +1,8 @@
-# ⚙️ AzIrrigation Backend (Node.js + DevOps K3s Deployment)
+# ⚙️ irrigation Backend (Node.js + Helm + K3s)
 
-This is the backend API service for the **AzIrrigation** smart irrigation system — a mobile-controlled platform that enables remote irrigation scheduling, soil sensor integration, and LLM-based watering recommendations.
+This is the backend API service for the **irrigation** smart irrigation system — a mobile-controlled platform that enables remote irrigation scheduling, soil sensor integration, MQTT-based device communication, and LLM-based watering recommendations.
 
-The backend is built using **Node.js**, containerized with **Docker**, and deployed to a **K3s Kubernetes cluster** on an AWS EC2 Ubuntu 22.04 instance. It supports real-time communication (WebSockets), secure secret management, persistent logging, and scalable deployment.
+The backend is built using **Node.js (JavaScript)**, containerized with **Docker**, and deployed to a **K3s Kubernetes cluster** on a DigitalOcean Ubuntu server using **Helm**. It supports real-time communication via MQTT and WebSockets, secure secret management, persistent logging, and scalable deployment.
 
 ---
 
@@ -10,187 +10,150 @@ The backend is built using **Node.js**, containerized with **Docker**, and deplo
 
 | Category | Technology |
 |----------|------------|
-| **Backend** | Node.js (Express) |
-| **Database** | MongoDB |
+| **Backend** | Node.js (Express, JavaScript) |
+| **Database** | MongoDB 6.0 |
+| **MQTT Broker** | Eclipse Mosquitto 2.0 |
 | **Containerization** | Docker + GitHub Container Registry (GHCR) |
-| **CI/CD** | GitHub Actions |
-| **Infrastructure** | Kubernetes (K3s) on AWS EC2 |
+| **CI/CD** | GitHub Actions + Helm |
+| **Infrastructure** | Kubernetes (K3s) on DigitalOcean |
 | **Ingress** | NGINX Ingress Controller + cert-manager |
 | **Monitoring** | Prometheus, Grafana, Alertmanager |
-| **Security** | Kubernetes Secrets + TLS |
+| **Security** | Kubernetes Secrets + TLS (Let's Encrypt) |
+
+---
+
+## 🏗️ Architecture
+
+```
+                    ESP32 Devices                     Mobile App
+                         │                                │
+                    [MQTT TCP]                      [REST / Socket.IO]
+                    port 31883                        port 443
+                         │                                │
+                         ▼                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     NGINX Ingress (TLS)                             │
+│                  api.irrigation.com                               │
+│         /api, /socket.io → Backend    /mqtt → Mosquitto             │
+└────────────────────────┬──────────────────────┬─────────────────────┘
+                         │                      │
+                         ▼                      ▼
+                 ┌───────────────┐     ┌─────────────────┐
+                 │   Backend     │────▶│  MQTT Broker     │
+                 │  (Node.js)   │     │  (Mosquitto)     │
+                 │  port 4000   │     │  port 1883       │
+                 └──────┬───────┘     └──────────────────┘
+                        │
+                        ▼
+                 ┌───────────────┐
+                 │   MongoDB     │
+                 │  port 27017   │
+                 └───────────────┘
+```
 
 ---
 
 ## 🚀 Key Features
 
 - 🔐 Secure secret management via `envFrom` in Kubernetes
+- 📡 Real-time device communication via MQTT (Mosquitto)
 - 🌱 Real-time soil data ingestion for irrigation logic
 - 📦 Persistent log storage using PVC (`/app/logs`)
 - 🧠 AI (LLM) support for dynamic watering advice
-- ♻️ Zero-downtime deployment with 2 backend replicas
-- 🧩 Internal-only service via ClusterIP (`backend-svc`)
+- ♻️ Zero-downtime deployment with Helm (`--atomic` rollback)
 - 🌐 TLS-enabled routing using Ingress and Let's Encrypt
 - 📊 Comprehensive Prometheus metrics for observability
+- 🔌 WebSocket support via Socket.IO
 
 ---
 
-## 📊 Metrics & Observability
+## ☸️ Helm Chart
 
-The backend includes a comprehensive **Prometheus metrics** setup for full observability of the irrigation system.
+The entire stack is managed via a single Helm chart in `irrigation-helm/`.
 
-### Metrics Endpoint
+### Chart Structure
 
 ```
-GET /metrics
+irrigation-helm/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── backend-deployment.yaml
+    ├── backend-service.yaml
+    ├── backend-pvc.yaml
+    ├── mongodb-deployment.yaml
+    ├── mongodb-service.yaml
+    ├── mongodb-pvc.yaml
+    ├── mqtt-deployment.yaml
+    ├── mqtt-service.yaml
+    ├── mqtt-configmap.yaml
+    ├── mqtt-pvc.yaml
+    ├── mqtt-nodeport.yaml
+    ├── ingress.yaml
+    ├── monitoring-ingress.yaml
+    ├── custom-rules.yaml
+    ├── pod-alerts.yaml
+    └── simple-test-rule.yaml
 ```
 
-Exposes all metrics in Prometheus format for scraping.
+### Resources Created
 
-### Default Node.js Metrics
-
-All default metrics are prefixed with `irrigation_backend_`:
-- CPU usage
-- Memory usage (heap, RSS)
-- Event loop lag
-- Active handles/requests
-- GC statistics
-
-### Custom Application Metrics
-
-#### HTTP Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_http_requests_total` | Counter | `method`, `route`, `status_code` | Total HTTP requests received |
-| `irrigation_http_request_duration_seconds` | Histogram | `method`, `route`, `status_code` | Request duration in seconds |
-
-#### Device Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_device_checkins_total` | Counter | `device_id` | Total device check-ins received |
-| `irrigation_active_devices` | Gauge | - | Devices active in last 10 minutes |
-
-#### Sensor Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_sensor_readings_total` | Counter | `sensor_type` | Sensor readings by type (`humidity`, `temperature`, `soil_moisture`) |
-| `irrigation_water_flow_rate` | Gauge | `device_id` | Current water flow rate per device |
-
-#### Valve Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_valve_operations_total` | Counter | `operation`, `device_id` | Valve operations (`open`/`close`) |
-
-#### Database Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_db_operations_total` | Counter | `operation`, `collection`, `status` | DB operations (`find`, `insert`, `update`, `delete`) |
-| `irrigation_db_operation_duration_seconds` | Histogram | `operation`, `collection` | DB operation latency |
-
-#### Application Metrics
-
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `irrigation_auth_attempts_total` | Counter | `status` | Authentication attempts (`success`/`failure`) |
-| `irrigation_ai_chat_requests_total` | Counter | - | AI/LLM chat requests |
-| `irrigation_notifications_sent_total` | Counter | `type` | Notifications sent by type |
-| `irrigation_errors_total` | Counter | `type`, `route` | Application errors |
-
-### Instrumented Controllers
-
-| Controller | Metrics Tracked |
-|------------|-----------------|
-| `device.controller.js` | Device check-ins, active devices gauge, DB operations |
-| `sensor.controller.js` | Sensor readings by type, DB operations |
-| `valve.controller.js` | Valve open/close operations, DB operations |
-
-### Metrics Middleware
-
-The `metricsMiddleware.js` automatically captures:
-- Request method
-- Route pattern (normalized, e.g., `/api/device/:id`)
-- Response status code
-- Request duration
-
-```javascript
-// Automatically applied to all routes
-app.use(metricsMiddleware);
-```
-
-### Histogram Buckets
-
-**HTTP Request Duration:**
-```
-[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5] seconds
-```
-
-**DB Operation Duration:**
-```
-[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2] seconds
-```
+| Resource | Name | Purpose |
+|----------|------|---------|
+| Deployment | `irrigation-backend` | Node.js API server |
+| Deployment | `irrigation-mongo` | MongoDB 6.0 database |
+| Deployment | `irrigation-mqtt` | Mosquitto MQTT broker |
+| Service | `irrigation-backend` | port 80 → 4000 |
+| Service | `irrigation-mongo` | port 27017 |
+| Service | `irrigation-mqtt` | ports 1883 + 9001 |
+| Service | `irrigation-mqtt-external` | NodePort 31883 for ESP32 devices |
+| Ingress | `irrigation-ingress` | HTTPS routing for API, Socket.IO, MQTT WebSocket |
+| Ingress | `irrigation-monitoring-ingress` | Grafana + Prometheus UI |
+| PVC | `irrigation-backend-logs-pvc` | Backend logs (1Gi) |
+| PVC | `irrigation-mongo-pvc` | MongoDB data (10Gi) |
+| PVC | `irrigation-mqtt-pvc` | MQTT persistence (1Gi) |
 
 ---
 
-## ☸️ Kubernetes Configuration
+## 📡 MQTT Communication
 
-### ✅ Deployment (`backend-deployment.yaml`)
+### Connection Endpoints
 
-- 2 replicas running Node.js containers
-- Docker image pulled from `ghcr.io/azirrigation/backend:latest`
-- Uses Kubernetes Secret `backend-env` for environment variables
-- Mounts persistent volume `backend-logs-pvc` for `/app/logs`
+| Who | Protocol | URL |
+|-----|----------|-----|
+| ESP32 devices | MQTT TCP | `mqtt://api.irrigation.com:11111` |
+| Backend (internal) | MQTT TCP | `mqtt://irrigation-mqtt:111111` |
+| Web/Browser | MQTT WebSocket | `wss://api.irrigation.com/mqtt` |
+| Local development | MQTT WebSocket | `wss://api.irrigation.com/mqtt` |
 
-### ✅ PVC (`backend-pvc.yaml`)
-
-- Provisioned **5Gi** of persistent storage
-- Storage class: `local-path`
-
-### ✅ Service (`backend-service.yaml`)
-
-- Type: `ClusterIP`
-- Port **80** routed to container port **4000**
-
-### ✅ Prometheus Scrape Configuration
-
-Pod annotations for Prometheus auto-discovery:
-
-```yaml
-annotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "4000"
-  prometheus.io/path: "/metrics"
-```
-
----
-
-## 📁 Project Structure
+### Topic Structure
 
 ```
-azirrigation-backend/
-├── .github/
-│   └── workflows/
-│       └── backend-ci.yml
-├── kubernetes/
-│   ├── backend-deployment.yaml
-│   ├── backend-service.yaml
-│   └── backend-pvc.yaml
-├── server/
-│   ├── controller/
-│   │   ├── device.controller.js
-│   │   ├── sensor.controller.js
-│   │   └── valve.controller.js
-│   ├── middleware/
-│   │   └── metricsMiddleware.js
-│   └── metrics.js
-├── Dockerfile
-├── index.js
-├── package.json
-├── .gitignore
-└── README.md
+irrigation/{deviceId}/sensors   → device publishes sensor data
+irrigation/{deviceId}/command   → server publishes commands to device
+irrigation/{deviceId}/status    → device confirms command execution
+```
+
+### Backend MQTT Configuration
+
+```JavaScript
+const options =
+  config.nodeEnv === "production"
+    ? {
+        username: config.mqtt.username,
+        password: config.mqtt.password,
+        reconnectPeriod: 5000,
+        connectTimeout: 10000,
+        protocol: "mqtt" as const,
+      }
+    : {
+        username: config.mqtt.username || undefined,
+        password: config.mqtt.password || undefined,
+        reconnectPeriod: 3000,
+        connectTimeout: 10000,
+        rejectUnauthorized: false,
+        protocol: "wss" as const,
+      };
 ```
 
 ---
@@ -201,67 +164,136 @@ azirrigation-backend/
 
 - On push to `production` branch
 
-### Steps
+### Pipeline Steps
 
-1. Build Docker image from backend
-2. Push image to GitHub Container Registry (GHCR)
-3. SSH into the K3s server and deploy using `kubectl set image`
-4. Roll out restart to apply the new image
+1. **Build** — Build Docker image and push to GHCR
+2. **Deploy** — Run `helm upgrade` with new image tag via kubeconfig
 
-### Secrets Used
+```yaml
+# Deploy step
+helm upgrade irrigation ./irrigation-helm \
+  --set backend.image.tag=${{ github.sha }} \
+  --atomic \
+  --timeout 120s
+```
+
+The `--atomic` flag ensures automatic rollback if the new deployment fails.
+
+### GitHub Secrets Required
 
 | Secret | Description |
 |--------|-------------|
-| `GHCR_PAT` | GitHub Container Registry token |
-| `K3S_CONFIG_RAW` | Raw Kubeconfig for K3s cluster access |
+| `GHCR_PAT_ROBI` | GitHub Container Registry token |
+| `DO_KUBECONFIG_RAW` | Raw kubeconfig for K3s cluster access |
 
 ---
 
-## 📦 Monitoring & Alerting
+## 📊 Metrics & Observability
 
-This backend is monitored via:
+### Metrics Endpoint
 
-| Tool | Purpose |
-|------|---------|
-| **Prometheus** | Metrics collection (CPU, memory, custom irrigation metrics) |
-| **Grafana** | Real-time dashboards and visualization |
-| **Alertmanager** | Threshold-based notifications |
-
-### Example Prometheus Queries
-
-```promql
-# Request rate (per second)
-rate(irrigation_http_requests_total[5m])
-
-# Average request duration
-rate(irrigation_http_request_duration_seconds_sum[5m]) / rate(irrigation_http_request_duration_seconds_count[5m])
-
-# Error rate percentage
-sum(rate(irrigation_http_requests_total{status_code=~"5.."}[5m])) / sum(rate(irrigation_http_requests_total[5m])) * 100
-
-# Active devices
-irrigation_active_devices
-
-# Valve operations per hour
-increase(irrigation_valve_operations_total[1h])
-
-# DB operation latency (p95)
-histogram_quantile(0.95, rate(irrigation_db_operation_duration_seconds_bucket[5m]))
-
-# Sensor readings by type
-sum by (sensor_type) (rate(irrigation_sensor_readings_total[5m]))
+```
+GET /metrics
 ```
 
-All alert rules and dashboards are configured in the `metrics/` and `alerting/` directories of the main project repo.
+Exposes all metrics in Prometheus format for scraping.
+
+### Custom Application Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `irrigation_http_requests_total` | Counter | Total HTTP requests by method, route, status |
+| `irrigation_http_request_duration_seconds` | Histogram | Request duration |
+| `irrigation_device_checkins_total` | Counter | Device check-ins by device_id |
+| `irrigation_active_devices` | Gauge | Devices active in last 10 minutes |
+| `irrigation_sensor_readings_total` | Counter | Sensor readings by type |
+| `irrigation_water_flow_rate` | Gauge | Current water flow rate per device |
+| `irrigation_valve_operations_total` | Counter | Valve open/close operations |
+| `irrigation_db_operations_total` | Counter | Database operations by collection |
+| `irrigation_db_operation_duration_seconds` | Histogram | Database operation latency |
+| `irrigation_auth_attempts_total` | Counter | Auth attempts (success/failure) |
+| `irrigation_ai_chat_requests_total` | Counter | AI/LLM chat requests |
+| `irrigation_errors_total` | Counter | Application errors by type |
+
+### Alert Rules
+
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| PodHighCPU | CPU > 80% for 10m | warning |
+| PodCrashLooping | Restart rate > 0.1/5m for 10m | warning |
+| PodNotRunning | Failed/Unknown/Pending for 5m | critical |
+
+### Monitoring Access
+
+| Service | URL |
+|---------|-----|
+| Grafana | `https://monitoring.irrigation.com/` |
+| Prometheus | `https://monitoring.irrigation.com/prometheus` |
 
 ---
 
-## 🔐 Security Best Practices
+## 🛠️ Deployment Guide
 
-- ✅ All sensitive variables (e.g., DB URIs, tokens) are injected via Kubernetes Secrets
-- ✅ TLS is enforced at ingress level using `cert-manager` and Let's Encrypt
-- ✅ `.env` file is not included in the repo — secrets must be created manually
-- ✅ Metrics endpoint does not expose sensitive data
+### Prerequisites
+
+- K3s cluster running
+- Helm 3 installed
+- NGINX Ingress Controller
+- cert-manager with ClusterIssuer
+
+### 1. Create Kubernetes Secrets
+
+```bash
+# GitHub Container Registry pull secret
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username=YOUR_GITHUB_USER \
+  --docker-password=YOUR_GITHUB_TOKEN
+
+# Backend environment variables
+kubectl create secret generic backend-env \
+  --from-literal=MONGO_URI=mongodb://irrigation-mongo:27017/irrigation \
+  --from-literal=MQTT_BROKER_URL=mqtt://irrigation-mqtt:1883 \
+  --from-literal=MQTT_USERNAME=irrigation \
+  --from-literal=MQTT_PASSWORD=YOUR_MQTT_PASSWORD \
+  --from-literal=NODE_ENV=production
+  # ... add other env vars
+
+# MongoDB credentials
+kubectl create secret generic mongo-env \
+  --from-literal=MONGO_INITDB_ROOT_USERNAME=admin \
+  --from-literal=MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_PASSWORD
+
+# MQTT password file
+kubectl create secret generic mqtt-password \
+  --from-literal=passwordfile='irrigation:HASHED_PASSWORD'
+```
+
+### 2. Apply Cluster Issuer
+
+```bash
+kubectl apply -f cluster-issuer.yaml
+```
+
+### 3. Deploy with Helm
+
+```bash
+cd irrigation-helm
+helm lint .
+helm install irrigation .
+```
+
+### 4. Verify
+
+```bash
+kubectl get pods,svc,pvc,ingress
+```
+
+### 5. Upgrade
+
+```bash
+helm upgrade irrigation .
+```
 
 ---
 
@@ -276,21 +308,32 @@ All alert rules and dashboards are configured in the `metrics/` and `alerting/` 
 ### Setup
 
 ```bash
-# Install dependencies
 npm install
-
-# Create .env file
-cp .env.example .env
-
-# Start development server
+cp .env.irrigation .env
 npm run dev
 ```
 
-### Test Metrics Endpoint
+
+### Test Endpoints
 
 ```bash
+# API
+curl http://localhost:4000/api
+
+# Metrics
 curl http://localhost:4000/metrics
 ```
+
+---
+
+## 🔐 Security
+
+- All sensitive variables injected via Kubernetes Secrets
+- TLS enforced at ingress level using cert-manager and Let's Encrypt
+- MQTT broker requires username/password authentication
+- `.env` file excluded from repo — secrets created manually
+- Metrics endpoint does not expose sensitive data
+- Internal services (MongoDB, MQTT) accessible only within the cluster
 
 ---
 

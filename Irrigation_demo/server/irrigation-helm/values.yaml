@@ -1,0 +1,74 @@
+backend:
+  replicas: 1
+  image:
+    repository: ghcr.io/example/irrigation-backend
+    tag: latest
+  port: 4000
+  imagePullSecret: ghcr-secret
+  envSecret: backend-env
+  logsStorage: "1Gi"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+
+mongodb:
+  replicas: 1
+  image:
+    repository: mongo
+    tag: "6.0"
+  port: 27017
+  envSecret: example-env
+  storage: "10Gi"
+  command: ["mongod"]
+  args:
+    - "--bind_ip_all"
+    - "--wiredTigerCacheSizeGB=0.50"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "800Mi"
+      cpu: "500m"
+
+
+mqtt:
+  replicas: 1
+  image:
+    repository: eclipse-mosquitto
+    tag: "2.0"
+  ports:
+    mqtt: 1883
+    websocket: 9001
+  storage: "1Gi"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+
+ingress:
+  host: api.irrigations.com
+  tlsSecret: irrigations-tls
+
+
+monitoring:
+  enabled: true
+  namespace: monitoring
+  host: monitoring.irrigations.com
+  tlsSecret: monitoring-tls
+  releaseName: monitoring-stack
+  alertmanager:
+    smtpHost: "smtp.gmail.com:587"
+    smtpFrom: "example@gmail.com"
+    smtpUsername: "example@gmail.com"
+    smtpPasswordSecret: alertmanager-smtp
+    receiver: "receiver@gmail.com"

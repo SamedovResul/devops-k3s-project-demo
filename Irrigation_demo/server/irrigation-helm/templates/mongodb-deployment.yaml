@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mongo
+spec:
+  replicas: {{ .Values.mongodb.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mongo
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mongo
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: mongo
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+          command: {{ .Values.mongodb.command | toJson }}
+          args:
+            {{- range .Values.mongodb.args }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - containerPort: {{ .Values.mongodb.port }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.mongodb.envSecret }}
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          resources:
+            requests:
+              memory: {{ .Values.mongodb.resources.requests.memory }}
+              cpu: {{ .Values.mongodb.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.mongodb.resources.limits.memory }}
+              cpu: {{ .Values.mongodb.resources.limits.cpu }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mongo-pvc

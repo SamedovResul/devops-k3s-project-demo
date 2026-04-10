@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mqtt-config
+data:
+  mosquitto.conf: |
+    listener {{ .Values.mqtt.ports.mqtt }}
+    allow_anonymous false
+    password_file /mosquitto/config/passwordfile
+
+    listener {{ .Values.mqtt.ports.websocket }}
+    protocol websockets
+    socket_domain ipv4
+
+    persistence true
+    persistence_location /mosquitto/data/

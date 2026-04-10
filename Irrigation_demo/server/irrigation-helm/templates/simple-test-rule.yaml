@@ -1,0 +1,21 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-test-rule
+  namespace: {{ .Values.monitoring.namespace }}
+  labels:
+    release: {{ .Values.monitoring.releaseName }}
+spec:
+  groups:
+  - name: test.rules
+    rules:
+    - alert: AlwaysFiringTest
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Test alert"
+        description: "This alert always fires for email test."
+{{- end }}
